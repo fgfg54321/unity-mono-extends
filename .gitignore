@@ -1,0 +1,7 @@
+
+external/android_krait_signal_handler/build/
+external/android_krait_signal_handler/jni/
+external/android_krait_signal_handler/obj/
+
+*.zip
+
