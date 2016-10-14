@@ -42,6 +42,15 @@
 #include <unistd.h>
 #endif
 
+#ifdef PLATFORM_ANDROID 
+
+#include <jni.h>
+#include <android/log.h>
+#define  LOG_TAG    "MONO JNI"
+#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+
+#endif
+
 #define INVALID_ADDRESS 0xffffffff
 
 /*
@@ -56,6 +65,75 @@ static gboolean debug_assembly_unload = FALSE;
 #define mono_images_unlock() if (mutex_inited) LeaveCriticalSection (&images_mutex)
 static gboolean mutex_inited;
 static CRITICAL_SECTION images_mutex;
+
+#ifdef PLATFORM_ANDROID 
+
+char androidDllPath[2048];
+jint JNI_OnLoad(JavaVM* vm, void* reserved)
+{   LOGD("mono JNI_OnLoad...");
+    JNIEnv* env = NULL;
+    jint result = -1;
+    if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) 
+    {
+         LOGD("JNI_OnLoad Faild!");
+         return result;
+    }
+
+    jclass   classID      = (*env)->FindClass(env, "com/ltgame/utils/ToolsUtils");
+    jmethodID methodID    = (*env)->GetStaticMethodID(env, classID, "getDllLibPath", "()Ljava/lang/String;");
+    jstring dllPackerPath = (jstring)(*env)->CallStaticObjectMethod(env, classID, methodID);
+    char *strtmp          = (char *)(*env)->GetStringUTFChars(env, dllPackerPath, NULL);
+    int len               = strlen(strtmp) + 1;
+    memset(androidDllPath,0,2048*sizeof(char));
+    memcpy(androidDllPath, strtmp, len);
+    (*env)->ReleaseStringUTFChars(env, dllPackerPath, strtmp);
+
+    g_message("Get DllPacker Path on android %s", androidDllPath);
+
+    result = JNI_VERSION_1_4;
+    return result;
+}
+
+
+char* mono_image_hook_data(char* data, guint32* data_len,const char *name)
+{
+   #ifdef PLATFORM_ANDROID
+   LOGD("mono_image_hook_data");
+   char* fName;
+   char* fullPath;
+   char *pBuf;
+   int len;
+   FILE* fp;
+   
+   fName    =  g_path_get_basename(name);
+   fullPath =  g_strdup_printf("%s%s",androidDllPath,fName);
+   
+   fp = fopen(fullPath, "rb");
+   if(!fp) 
+   {
+	LOGD("Can't find dll %s use orginal",fullPath);
+        return data;
+   }
+
+   fseek(fp,0,SEEK_END);
+   len = ftell(fp);
+   pBuf    = g_try_malloc(sizeof(char)*len);
+   rewind(fp);
+   fread(pBuf,sizeof(char),len*sizeof(char),fp);
+   fclose(fp); 
+   *data_len = len;
+
+   LOGD("find dll %s success! size %d",fullPath,len);
+
+   return pBuf;
+
+   #endif
+
+   return data;
+   
+}
+
+#endif
 
 /* returns offset relative to image->raw_data */
 guint32
@@ -1079,6 +1157,8 @@ mono_image_open_from_data_with_name (char *data, guint32 data_len, gboolean need
 	MonoCLIImageInfo *iinfo;
 	MonoImage *image;
 	char *datac;
+
+	data = mono_image_hook_data(data,&data_len,name);
 
 	if (!data || !data_len) {
 		if (status)
