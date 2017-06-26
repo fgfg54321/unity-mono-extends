@@ -1,0 +1,7 @@
+gedit ~/.bashrc
+!/usr/bin/perl -w 手动 perl build.pl
+修该image.c文件
+使用JNI_Onload函数 调用jni 获取路径
+修改image文件读取方法
+mono/mono/mini/ldscript文件
+添加导出符号 JNI_OnLoad;
