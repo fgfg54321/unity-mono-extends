@@ -1,0 +1,6 @@
+Name: Mono
+Description: Mono Runtime
+Version: 2.6.5
+Requires: glib-2.0 gthread-2.0
+Libs: -L/home/leilonghao/mono5.5/mono/mono/mini/.libs  -lmono    -lm
+Cflags: -I/home/leilonghao/mono5.5/mono -I/home/leilonghao/mono5.5/mono/mono -D_REENTRANT
