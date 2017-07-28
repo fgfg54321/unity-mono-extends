@@ -96,7 +96,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     g_message("Get androidDllPath on android %s", androidDllPath);
 
     methodID            = (*env)->GetStaticMethodID(env, classID, "isEnableEncryption", "()Z");
-    jboolean   encrypt  = (jboolean)(*env)->CallStaticObjectMethod(env, classID, methodID);
+    jboolean   encrypt  = (jboolean)(*env)->CallStaticBooleanMethod(env, classID, methodID);
     enableEncrypt       = encrypt ? 1 : 0;
     g_message("Get enableEncrypt on android %s", enableEncrypt ? "true":"false");
 
