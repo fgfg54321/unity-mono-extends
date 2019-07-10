@@ -1,0 +1,10 @@
+使用 autogen.sh 检查环境根据提示安装相应依赖库
+No package 'glib-2.0' found
+	sudo apt-get install libperl-dev
+	sudo apt-get install libgtk2.0-dev
+
+修改 build_runtime_android.sh KRAIT_PATCH_PATH="${CWD}/external/android_krait_signal_handler"
+原始的下载的路径不正确
+修改 external/android_krait_signal_handler/build.pl 第一行
+#!/usr/bin/perl -w
+然后手动 perl build.pl 再重新编译
