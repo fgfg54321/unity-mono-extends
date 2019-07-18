@@ -1,4 +1,6 @@
+配置ndk版本
 gedit ~/.bashrc
+source ~/.bashrc
 
 使用 autogen.sh 检查环境根据提示安装相应依赖库
 No package 'glib-2.0' found

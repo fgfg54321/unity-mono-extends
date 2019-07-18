@@ -13,3 +13,7 @@ No package 'glib-2.0' found
 修改 external/android_krait_signal_handler/build.pl 第一行
 #!/usr/bin/perl -w
 然后手动 perl build.pl 再重新编译
+
+新版本的 external/android_krait_signal_handler 使用arm-v7a的编译平台 链接不通过 需要修改arm
+
+
